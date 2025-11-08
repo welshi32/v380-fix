@@ -18,7 +18,7 @@ struct TCommandReq {
 			uint32_t deviceId;
 			char hostDateTime[32]; // optional - maybe related to unk1/2, on v380 pc this is a domain name
 			char username[32];
-			char password[32]; // consists of randomkey:password
+			char password[48]; // consists of randomkey:password
 		} login;
 		struct {
 			uint32_t deviceId;   // 4:  +292
@@ -126,7 +126,7 @@ void GeneratePassword(std::vector<uint8_t>& output, const std::string& password)
 	const char* staticKey = "macrovideo+*#!^@";
 
 	std::vector<uint8_t> paddedPassword;
-	size_t pad = AES_BLOCKLEN - (password.size() % AES_BLOCKLEN);
+	size_t pad = 2 * AES_BLOCKLEN - (password.size() % AES_BLOCKLEN);
 	paddedPassword.resize(password.size() + pad);
 	memcpy_s(paddedPassword.data(), paddedPassword.size(), password.c_str(), password.size());
 
@@ -373,7 +373,7 @@ int main(int argc, const char* argv[])
 			req->u.login.unknown2 = 2;
 			req->u.login.unknown3 = 1;
 			memcpy_s(req->u.login.username, 32, username.c_str(), username.size());
-			memcpy_s(req->u.login.password, 32, pw.data(), pw.size());
+			memcpy_s(req->u.login.password, 48, pw.data(), pw.size());
 
 			socketAuth.Send(buf);
 			socketAuth.Recv(buf, 256, 5000);
